@@ -80,10 +80,22 @@ def allocate_duties(people_file, weekdays_dates, weekends_dates):
             if found_soldier == False:   
                 oldest_last_allocated_soldier = find_oldest_last_allocated(df, allocated_soldiers)
                 print(date + ":", oldest_last_allocated_soldier)
-                df.loc[df['Name'] == oldest_last_allocated_soldier, 'Total Weekends'] += 1
+                df.loc[df['Name'] == oldest_last_allocated_soldier, 'Total Duty Days'] += 1
                 df.loc[df['Name'] == oldest_last_allocated_soldier, 'Last Allocation Date'] = date
                 allocated_soldiers.add(oldest_last_allocated_soldier)
     # Update the original Excel file with the updated duty days and weekends done
+    # Convert the "Last Allocation Date" column to datetime format
+    df['Last Allocation Date'] = pd.to_datetime(df['Last Allocation Date'])
+
+    # Sort the DataFrame by the "Last Allocation Date" column from oldest to newest
+    df = df.sort_values(by='Last Allocation Date')
+
+    # Reset the index to reflect the new sorted order
+    df = df.reset_index(drop=True)
+    df['Last Allocation Date'] = df['Last Allocation Date'].dt.strftime('%Y-%m-%d')
+
+    # Now the DataFrame is sorted by the "Last Allocation Date" column from oldest to newest
+
     df.to_excel(people_file, index=False)
     
     return df
